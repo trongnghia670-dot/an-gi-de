@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ăn Gì Đê! - Ultimate Pro Final</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        primary: { 50: '#fff7ed', 100: '#ffedd5', 500: '#f97316', 600: '#ea580c', 700: '#c2410c' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { -webkit-tap-highlight-color: transparent; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Animations */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(249, 115, 22, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
+        }
+        .animate-pulse-ring { animation: pulse-ring 2s infinite; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-6px) rotate(3deg); }
+        }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+
+        @keyframes shake-sm {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+        @keyframes shake-lg {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            20% { transform: translate(-3px, 2px) rotate(-10deg); }
+            40% { transform: translate(3px, -2px) rotate(10deg); }
+            60% { transform: translate(-3px, -2px) rotate(-10deg); }
+            80% { transform: translate(3px, 2px) rotate(10deg); }
+        }
+        .shake-1 { animation: shake-sm 0.3s ease-in-out; }
+        .shake-2 { animation: shake-lg 0.4s ease-in-out; }
+        
+        .slot-blur { filter: blur(2px); transform: scale(0.98); transition: all 0.05s; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 font-sans antialiased flex justify-center items-center sm:p-4 select-none">
+
+    <!-- Mobile Frame -->
+    <div class="w-full max-w-md bg-white sm:rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col min-h-screen sm:min-h-[850px] sm:max-h-[92vh] relative sm:border-[6px] border-slate-800">
+        
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 text-white p-5 pb-6 rounded-b-[2rem] shadow-lg relative z-10">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl shadow-inner border border-white/30 animate-float">
+                        🍲
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-black tracking-tight flex items-center gap-1.5">
+                            Ăn Gì Đê! <span class="bg-amber-300 text-orange-900 text-[9px] font-black px-2 py-0.5 rounded-full uppercase">PRO</span>
+                        </h1>
+                        <p class="text-[11px] text-orange-100 font-medium mt-0.5" id="timeGreetingText">Việc của bạn là lười, chọn món để tôi lo!</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Body -->
+        <main class="flex-1 overflow-y-auto hide-scrollbar p-5 space-y-6 pb-24" id="mainBody">
+
+            <!-- TAB 1: HOME (THỰC ĐƠN & MINIGAMES) -->
+            <div id="tab-home" class="tab-content space-y-6 block">
+                
+                <!-- Khu vực Minigames -->
+                <div class="text-center pt-1 pb-3 border-b border-slate-200">
+                    <div class="inline-flex bg-white p-1 rounded-2xl border border-slate-100 shadow-sm mb-4">
+                        <button onclick="setSpinFilter('all', this)" class="spin-mode-btn px-4 py-1.5 rounded-xl text-[11px] font-bold bg-orange-600 text-white shadow transition">Tất cả (60)</button>
+                        <button onclick="setSpinFilter('food', this)" class="spin-mode-btn px-4 py-1.5 rounded-xl text-[11px] font-bold text-slate-500 hover:bg-orange-50 transition">Đồ Ăn</button>
+                        <button onclick="setSpinFilter('drink', this)" class="spin-mode-btn px-4 py-1.5 rounded-xl text-[11px] font-bold text-slate-500 hover:bg-orange-50 transition">Đồ Uống</button>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-3">
+                        <!-- Độc Tài -->
+                        <button onclick="openDictatorModal()" class="bg-gradient-to-br from-orange-500 to-red-500 rounded-[2rem] p-3 sm:p-4 flex flex-col items-center justify-center text-white shadow-lg shadow-orange-500/30 transform active:scale-95 transition group relative overflow-hidden">
+                            <div class="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition"></div>
+                            <span class="text-4xl mb-2 drop-shadow-md group-hover:rotate-12 transition">🎰</span>
+                            <span class="text-[10px] sm:text-[11px] font-black uppercase tracking-wider drop-shadow-md">Độc Tài</span>
+                        </button>
+                        <!-- Túi Mù -->
+                        <button onclick="openGachaModal()" class="bg-gradient-to-br from-amber-400 to-orange-500 rounded-[2rem] p-3 sm:p-4 flex flex-col items-center justify-center text-white shadow-lg shadow-amber-500/30 transform active:scale-95 transition group relative overflow-hidden">
+                            <div class="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition"></div>
+                            <span class="text-4xl mb-2 drop-shadow-md animate-float group-hover:scale-110 transition">🎁</span>
+                            <span class="text-[10px] sm:text-[11px] font-black uppercase tracking-wider drop-shadow-md">Túi Mù</span>
+                        </button>
+                        <!-- Đấu Trường -->
+                        <button onclick="openBattleModal()" class="bg-gradient-to-br from-rose-500 to-pink-600 rounded-[2rem] p-3 sm:p-4 flex flex-col items-center justify-center text-white shadow-lg shadow-pink-500/30 transform active:scale-95 transition group relative overflow-hidden">
+                            <div class="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition"></div>
+                            <span class="text-4xl mb-2 drop-shadow-md group-hover:-rotate-12 transition">⚔️</span>
+                            <span class="text-[10px] sm:text-[11px] font-black uppercase tracking-wider drop-shadow-md">Đối Kháng</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Danh sách 60 món -->
+                <div class="space-y-3 pt-1">
+                    <div class="flex justify-between items-end">
+                        <h3 class="font-extrabold text-slate-800 text-sm">🍽️ Thực đơn quốc dân</h3>
+                        <span class="text-[11px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded-md" id="itemCount">60 món</span>
+                    </div>
+
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" oninput="handleSearch(this.value)" placeholder="Tìm món ăn, đồ uống..." class="w-full pl-9 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 focus:outline-none focus:border-orange-500 focus:ring-2 ring-orange-500/20 transition">
+                    </div>
+
+                    <div class="flex space-x-2 overflow-x-auto hide-scrollbar pb-2 pt-1" id="categoryFilters">
+                        <!-- Rendered by JS -->
+                    </div>
+
+                    <div id="foodGrid" class="grid grid-cols-1 gap-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: KHO & QUẢN LÝ -->
+            <div id="tab-kho" class="tab-content hidden space-y-4">
+                <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-5 rounded-3xl text-white shadow-lg flex justify-between items-center">
+                    <div>
+                        <h2 class="text-sm font-black">Kho Lưu Trữ Món Ăn</h2>
+                        <p class="text-[10px] text-slate-400 mt-1">Dữ liệu lưu trên máy của bạn</p>
+                    </div>
+                    <button onclick="openFormModal()" class="w-10 h-10 bg-orange-500 hover:bg-orange-600 rounded-xl flex items-center justify-center shadow-md transition">
+                        <i class="fa-solid fa-plus text-sm"></i>
+                    </button>
+                </div>
+                
+                <button onclick="resetDefaultFoods()" class="w-full py-3 bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-left"></i> Khôi phục 60 món mặc định
+                </button>
+
+                <div id="khoFoodGrid" class="grid grid-cols-1 gap-3 pt-2">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-slate-100 py-3 px-2 sm:px-6 flex justify-around items-center z-20 pb-5 sm:pb-3 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)]">
+            <button onclick="switchTab('home', this)" class="nav-btn text-orange-600 w-1/2 flex flex-col items-center gap-1 transition-colors">
+                <i class="fa-solid fa-utensils text-lg"></i>
+                <span class="text-[10px] font-black uppercase tracking-wider">Thực đơn</span>
+            </button>
+            <button onclick="switchTab('kho', this)" class="nav-btn text-slate-400 hover:text-orange-500 w-1/2 flex flex-col items-center gap-1 transition-colors">
+                <i class="fa-solid fa-database text-lg"></i>
+                <span class="text-[10px] font-bold uppercase tracking-wider">Kho & Sửa</span>
+            </button>
+        </nav>
+
+        <!-- MODAL: ĐỘC TÀI (SLOT MACHINE) -->
+        <div id="dictatorModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+            <div class="bg-white w-full max-w-sm rounded-[2.5rem] shadow-2xl p-6 text-center space-y-4 border-4 border-orange-500 relative" id="dictatorContent">
+                <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-orange-500 text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl border-4 border-white shadow-lg">👑</div>
+                
+                <h3 class="text-xs font-bold text-slate-500 pt-4" id="dictatorReason">Hệ thống đang chuẩn bị quay...</h3>
+                
+                <div class="bg-slate-800 p-2.5 rounded-3xl border-4 border-slate-700 shadow-inner">
+                    <div id="slotWindow" class="bg-white rounded-2xl p-3 relative overflow-hidden h-48 flex flex-col items-center justify-center shadow-lg">
+                        <div id="slotImageContainer" class="w-full h-24 bg-slate-100 rounded-xl mb-3 overflow-hidden relative flex-shrink-0">
+                            <img id="dictatorImg" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" onerror="handleImgError(this)" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                            <span id="dictatorEmojiBadge" class="absolute bottom-1 right-2 text-3xl drop-shadow">🍲</span>
+                        </div>
+                        <h2 id="dictatorName" class="text-lg font-black text-slate-800 line-clamp-1 w-full text-center">Đang chọn...</h2>
+                        <p id="dictatorCategory" class="text-[10px] font-bold text-orange-600 uppercase mt-0.5">---</p>
+                    </div>
+                </div>
+
+                <div id="dictatorActions" class="grid grid-cols-2 gap-3 opacity-50 pointer-events-none pt-2">
+                    <button onclick="startSlotSpin()" class="py-3.5 bg-slate-100 text-slate-700 font-extrabold rounded-2xl text-xs hover:bg-slate-200 transition">Quay lại</button>
+                    <button onclick="openDeliveryModal('dictator')" class="py-3.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-extrabold rounded-2xl text-xs shadow-md">Chốt đơn luôn</button>
+                </div>
+                
+                <button onclick="closeDictatorModal()" class="w-full py-2 text-slate-400 font-bold text-xs underline mt-2">Thoát</button>
+            </div>
+        </div>
+
+        <!-- MODAL: TÚI MÙ (GACHA) -->
+        <div id="gachaModal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+            <div class="bg-white w-full max-w-sm rounded-[2.5rem] shadow-2xl p-6 text-center space-y-6 relative border-4 border-amber-400">
+                <button onclick="closeGachaModal()" class="absolute top-4 right-5 text-slate-300 hover:text-slate-600 text-2xl z-10 transition"><i class="fa-solid fa-xmark"></i></button>
+                
+                <div class="space-y-2 pt-2">
+                    <span class="bg-amber-100 text-amber-800 text-[10px] font-black px-3 py-1 rounded-full uppercase">Thử vận may</span>
+                    <h2 class="text-2xl font-black text-slate-800">Túi Mù Định Mệnh</h2>
+                    <p class="text-xs text-slate-500">Chạm 3 lần để đập hộp.</p>
+                </div>
+                
+                <div id="gachaBoxStage" onclick="tapGachaBox()" class="w-56 h-56 mx-auto bg-gradient-to-b from-amber-50 to-orange-100 border-4 border-dashed border-amber-300 rounded-[2.5rem] cursor-pointer flex flex-col items-center justify-center space-y-4 shadow-inner relative overflow-hidden active:scale-95 transition-transform">
+                    <div class="flex space-x-1.5 absolute top-4" id="gachaHearts">
+                        <span class="w-8 h-2.5 rounded-full bg-amber-200"></span>
+                        <span class="w-8 h-2.5 rounded-full bg-amber-200"></span>
+                        <span class="w-8 h-2.5 rounded-full bg-amber-200"></span>
+                    </div>
+                    <div id="gachaGiftIcon" class="text-7xl animate-float drop-shadow-xl mt-4">🎁</div>
+                    <span id="gachaTapHint" class="text-[11px] font-black text-amber-700 bg-white/80 px-4 py-1.5 rounded-full shadow-sm backdrop-blur-sm">👆 Chạm để mở</span>
+                </div>
+
+                <div id="gachaResultStage" class="hidden w-full space-y-4 max-w-sm mx-auto">
+                    <div class="bg-orange-50 rounded-3xl p-4 border border-amber-200 shadow-inner space-y-3">
+                        <div class="relative h-40 w-full rounded-2xl overflow-hidden bg-slate-100">
+                            <img id="gachaImg" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" onerror="handleImgError(this)" class="w-full h-full object-cover">
+                            <span id="gachaEmoji" class="absolute bottom-2 right-2 text-3xl drop-shadow-md">🍲</span>
+                        </div>
+                        <h2 id="gachaName" class="text-xl font-black text-slate-800">Tên món</h2>
+                        <p id="gachaDesc" class="text-[11px] text-slate-500 line-clamp-2">Mô tả</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="resetGachaBox()" class="py-3.5 bg-slate-200 text-slate-600 font-extrabold rounded-2xl text-xs hover:bg-slate-300 transition">Thử lại</button>
+                        <button onclick="openDeliveryModal('gacha')" class="py-3.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-extrabold rounded-2xl text-xs shadow-md">Chốt đơn</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: ĐẤU TRƯỜNG -->
+        <div id="battleModal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+            <div class="bg-white w-full max-w-sm rounded-[2.5rem] shadow-2xl p-6 text-center space-y-5 relative border-4 border-rose-500">
+                <button onclick="closeBattleModal()" class="absolute top-4 right-5 text-slate-300 hover:text-slate-600 text-2xl z-10 transition"><i class="fa-solid fa-xmark"></i></button>
+                
+                <div class="text-center space-y-1 pt-2">
+                    <h2 class="text-xl font-black text-slate-800">⚔️ Đấu Trường 1vs1</h2>
+                    <p class="text-[11px] text-slate-500">Loại trực tiếp để tìm ra chân ái</p>
+                </div>
+
+                <div id="battleFightStage" class="w-full">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="bg-rose-100 text-rose-600 text-[10px] font-black px-3 py-1 rounded-full uppercase" id="battleRoundText">Tứ Kết</span>
+                        <span class="text-[10px] font-bold text-slate-400" id="battleProgressText">Trận 1/4</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-4">
+                        <div id="battleProgressBar" class="bg-rose-500 h-full w-0 transition-all duration-300"></div>
+                    </div>
+                    <div class="relative grid grid-cols-1 gap-4" id="battleChoicesContainer">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: FORM THÊM/SỬA MÓN -->
+        <div id="formModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+            <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl p-6 space-y-4 relative">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                    <h3 class="font-black text-sm text-slate-800" id="formTitle">➕ Thêm Món Mới</h3>
+                    <button onclick="closeFormModal()" class="text-slate-400 hover:text-slate-600 bg-slate-100 w-8 h-8 rounded-full flex justify-center items-center"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <form id="foodForm" onsubmit="handleSaveFood(event)" class="space-y-3">
+                    <input type="hidden" id="formId">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Tên món *</label>
+                        <input type="text" id="formName" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 ring-orange-500/20 outline-none">
+                    </div>
+                    <div class="flex gap-2">
+                        <div class="flex-1">
+                            <label class="block text-[10px] font-bold text-slate-500 mb-1">Link Ảnh (URL) *</label>
+                            <input type="url" id="formImg" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 ring-orange-500/20 outline-none">
+                        </div>
+                        <div class="w-20">
+                            <label class="block text-[10px] font-bold text-slate-500 mb-1">Emoji</label>
+                            <input type="text" id="formEmoji" value="🍲" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-center">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Danh mục</label>
+                        <select id="formCategory" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none">
+                            <option value="cơm">🍚 Cơm</option>
+                            <option value="nước">🍜 Bún / Phở</option>
+                            <option value="lẩu nướng">🍲 Lẩu & Nướng</option>
+                            <option value="bánh">🥖 Bánh / Ăn nhẹ</option>
+                            <option value="ăn vặt">🍢 Ăn vặt</option>
+                            <option value="đồ uống">🧋 Đồ uống</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Mô tả / Gợi ý quán</label>
+                        <textarea id="formDesc" rows="2" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 ring-orange-500/20 outline-none"></textarea>
+                    </div>
+                    <button type="submit" class="w-full py-3.5 bg-slate-900 text-white font-black rounded-xl text-xs mt-2 shadow-lg hover:bg-slate-800 transition">LƯU DỮ LIỆU</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- MODAL: ĐẶT MÓN (DELIVERY) -->
+        <div id="deliveryModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+            <div class="bg-white w-full max-w-sm rounded-[2.5rem] shadow-2xl p-6 text-center space-y-4">
+                <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-2">🛵</div>
+                <h3 class="font-black text-lg text-slate-800" id="deliveryTitle">Chốt đơn</h3>
+                <p class="text-xs text-slate-500 pb-2">Chọn ứng dụng để tìm quán gần bạn nhất:</p>
+                
+                <div class="space-y-2.5">
+                    <a id="linkGoogleMaps" href="#" target="_blank" class="w-full py-3.5 bg-blue-600 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-md">
+                        <i class="fa-solid fa-map-location-dot"></i> Tìm quán trên Google Maps
+                    </a>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <a href="https://shopeefood.vn" target="_blank" class="py-3.5 bg-[#EE4D2D] text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow">
+                            <i class="fa-solid fa-bag-shopping"></i> ShopeeFood
+                        </a>
+                        <a href="https://food.grab.com" target="_blank" class="py-3.5 bg-[#00B14F] text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow">
+                            <i class="fa-solid fa-motorcycle"></i> GrabFood
+                        </a>
+                    </div>
+                </div>
+                <button onclick="closeDeliveryModal()" class="w-full py-2.5 text-slate-500 font-bold text-xs underline mt-2">Đóng lại</button>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed top-6 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-5 py-3 rounded-full text-xs font-bold shadow-2xl z-[60] transition-all duration-300 opacity-0 pointer-events-none flex items-center gap-2">
+            <i class="fa-solid fa-bell text-orange-400"></i>
+            <span id="toastText">Thông báo!</span>
+        </div>
+
+    </div>
+
+    <script>
+        /* ================= AUDIO API ================= */
+        let audioCtx;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSound(type) {
+            initAudio();
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+            if (type === 'tick') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(100, now + 0.05);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            } else if (type === 'win') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                osc.frequency.setValueAtTime(1046.50, now + 0.3); // C6
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.2, now + 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+                osc.start(now);
+                osc.stop(now + 0.8);
+            } else if (type === 'tap') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, now);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            }
+        }
+
+        /* ================= DỮ LIỆU 60 MÓN ================= */
+        const defaultFoods = [
+            // Cơm (10)
+            { id: 1, name: "Cơm tấm sườn bì chả", emoji: "🍛", category: "cơm", img: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80", desc: "Đĩa cơm tấm sườn nướng mật ong vàng óng, bì thính, chả trứng." },
+            { id: 2, name: "Cơm gà xối mỡ", emoji: "🍗", category: "cơm", img: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=500&q=80", desc: "Đùi gà chiên xối mỡ da giòn rụm ăn cùng cơm chiên đỏ." },
+            { id: 3, name: "Cơm gà Hải Nam", emoji: "🐔", category: "cơm", img: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=500&q=80", desc: "Gà luộc mọng nước, hạt cơm nấu nước dùng gà thơm béo." },
+            { id: 4, name: "Cơm chiên Dương Châu", emoji: "🍚", category: "cơm", img: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=500&q=80", desc: "Cơm chiên lạp xưởng, tôm, đậu cô ve vàng ươm tơi xốp." },
+            { id: 5, name: "Cơm bò lúc lắc", emoji: "🥩", category: "cơm", img: "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=500&q=80", desc: "Thịt bò thăn cắt vuông áp chảo mềm mọng cùng ớt chuông." },
+            { id: 6, name: "Cơm sườn kho tiêu", emoji: "🍖", category: "cơm", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80", desc: "Sườn non rim kẹo sánh, đậm vị tiêu xanh ăn hao cơm." },
+            { id: 7, name: "Cơm cá lóc kho tộ", emoji: "🐟", category: "cơm", img: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80", desc: "Cá lóc kho đất nung đậm đà màu cánh gián." },
+            { id: 8, name: "Cơm trộn Bibimbap", emoji: "🥗", category: "cơm", img: "https://images.unsplash.com/photo-1553163147-622ab57be1c7?auto=format&fit=crop&w=500&q=80", desc: "Cơm trộn Hàn Quốc với thịt bò, trứng, rau và sốt cay." },
+            { id: 9, name: "Cơm cà ri Nhật Bản", emoji: "🍛", category: "cơm", img: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=500&q=80", desc: "Sốt cà ri sánh mịn thơm dịu kết hợp thịt chiên xù xốp giòn." },
+            { id: 10, name: "Cơm hến Huế", emoji: "🥣", category: "cơm", img: "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=500&q=80", desc: "Cơm nguội trộn hến xào mắm ruốc, tóp mỡ, bắp chuối." },
+            // Nước (12)
+            { id: 11, name: "Phở bò tái nạm", emoji: "🍜", category: "nước", img: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?auto=format&fit=crop&w=500&q=80", desc: "Phở truyền thống nước dùng thanh ngọt, thịt bò tái mềm." },
+            { id: 12, name: "Bún bò Huế", emoji: "🌶️", category: "nước", img: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=500&q=80", desc: "Nước dùng cay nồng mùi sả mắm ruốc, giò heo, chả cua." },
+            { id: 13, name: "Bún chả Hà Nội", emoji: "🥢", category: "nước", img: "https://images.unsplash.com/photo-1555126634-323283e090fa?auto=format&fit=crop&w=500&q=80", desc: "Thịt nướng than hoa ngập trong nước mắm chua ngọt." },
+            { id: 14, name: "Bún riêu cua đồng", emoji: "🦀", category: "nước", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80", desc: "Nước lèo cà chua thanh mát, riêu cua béo ngậy." },
+            { id: 15, name: "Bún đậu mắm tôm", emoji: "🍱", category: "nước", img: "https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=500&q=80", desc: "Đậu hũ chiên giòn, thịt luộc, chả cốm chấm mắm tôm." },
+            { id: 16, name: "Bún thịt nướng", emoji: "🍢", category: "nước", img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=500&q=80", desc: "Bún tươi trộn thịt heo nướng, chả giò, rau thơm, đậu phộng." },
+            { id: 17, name: "Hủ tiếu Nam Vang", emoji: "🍲", category: "nước", img: "https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&w=500&q=80", desc: "Sợi hủ tiếu dai, tôm, thịt bằm, trứng cút, tỏi phi thơm." },
+            { id: 18, name: "Mì Quảng", emoji: "🍤", category: "nước", img: "https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?auto=format&fit=crop&w=500&q=80", desc: "Sợi mì vàng nghệ, nhân tôm thịt, chan nước lèo đậm đà xăm xắp." },
+            { id: 19, name: "Bánh canh cua", emoji: "🦀", category: "nước", img: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=500&q=80", desc: "Nước súp sền sệt, sợi bánh canh bột lọc dẻo dai và thịt cua." },
+            { id: 20, name: "Mì cay hải sản 7 cấp độ", emoji: "🌶️", category: "nước", img: "https://images.unsplash.com/photo-1617093727343-374698b1b08d?auto=format&fit=crop&w=500&q=80", desc: "Mì sợi dai nấu thố đất sôi sùng sục, vị cay nồng xé lưỡi." },
+            { id: 21, name: "Cháo sườn sụn quẩy", emoji: "🥣", category: "nước", img: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=500&q=80", desc: "Cháo gạo xay sánh mịn mịn màng, sườn sụn giòn sần sật." },
+            { id: 22, name: "Miến gà măng mọc", emoji: "🍜", category: "nước", img: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?auto=format&fit=crop&w=500&q=80", desc: "Sợi miến dong dai ngon ăn cùng thịt gà ta xé phay, măng khô." },
+            // Lẩu & Nướng (8)
+            { id: 23, name: "Lẩu Thái Tomyum", emoji: "🥘", category: "lẩu nướng", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80", desc: "Nước lẩu chua cay cốt dừa béo ngậy nhúng hải sản tôm mực." },
+            { id: 24, name: "Thịt nướng BBQ Hàn", emoji: "🥓", category: "lẩu nướng", img: "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=500&q=80", desc: "Ba chỉ bò, heo tẩm ướp nướng xèo xèo cuốn xà lách chấm tương." },
+            { id: 25, name: "Lẩu bò nhúng dấm", emoji: "🍲", category: "lẩu nướng", img: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=80", desc: "Nước giấm dứa chua thanh cuộn thịt bò bắp chấm mắm nêm." },
+            { id: 26, name: "Gà nướng cơm lam", emoji: "🍗", category: "lẩu nướng", img: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=500&q=80", desc: "Gà đồi nướng mắc khén thơm lừng ăn kèm ống cơm lam dẻo." },
+            { id: 27, name: "Bò né bánh mì chảo", emoji: "🍳", category: "lẩu nướng", img: "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=500&q=80", desc: "Chảo gang xèo xèo thịt bò bít tết, pate, ốp la, xíu mại." },
+            { id: 28, name: "Lẩu cá kèo lá giang", emoji: "🐟", category: "lẩu nướng", img: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=500&q=80", desc: "Lẩu chua vị đặc trưng lá giang miền Tây, cá kèo béo ngậy." },
+            { id: 29, name: "Bạch tuộc nướng sa tế", emoji: "🐙", category: "lẩu nướng", img: "https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=500&q=80", desc: "Bạch tuộc nướng than hoa dai giòn cay xé lưỡi." },
+            { id: 30, name: "Lẩu gà lá é", emoji: "🐔", category: "lẩu nướng", img: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=500&q=80", desc: "Đặc sản Đà Lạt gà nấu măng, nấm và lá é the mát." },
+            // Bánh / Ăn nhẹ (10)
+            { id: 31, name: "Bánh mì xíu mại", emoji: "🥖", category: "bánh", img: "https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=500&q=80", desc: "Chén xíu mại nóng hổi nước lèo trong vắt chấm bánh mì giòn." },
+            { id: 32, name: "Bánh mì thịt chả", emoji: "🥪", category: "bánh", img: "https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=500&q=80", desc: "Ổ bánh mì kẹp chả lụa, thịt nguội, pate gan béo ngậy." },
+            { id: 33, name: "Bánh xèo miền Tây", emoji: "🥞", category: "bánh", img: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=500&q=80", desc: "Vỏ bánh tráng mỏng giòn rụm, nhân tôm thịt giá, cuốn rau rừng." },
+            { id: 34, name: "Bánh cuốn nóng", emoji: "🥟", category: "bánh", img: "https://images.unsplash.com/photo-1496116218417-1a781b1c416c?auto=format&fit=crop&w=500&q=80", desc: "Bánh cuốn tráng tay nhân mộc nhĩ thịt băm rắc hành phi." },
+            { id: 35, name: "Pizza phô mai", emoji: "🍕", category: "bánh", img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=500&q=80", desc: "Đế bánh nướng xốp mềm phủ ngập phô mai mozzarella." },
+            { id: 36, name: "Hamburger bò", emoji: "🍔", category: "bánh", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=80", desc: "Bánh mì tròn kẹp nhân bò băm nướng phô mai béo ngậy." },
+            { id: 37, name: "Xôi mặn thập cẩm", emoji: "🍙", category: "bánh", img: "https://images.unsplash.com/photo-1516684732162-798a0062be99?auto=format&fit=crop&w=500&q=80", desc: "Gói xôi nếp dẻo thơm rưới mỡ hành, lạp xưởng, chà bông." },
+            { id: 38, name: "Bánh canh chả cá", emoji: "🥣", category: "bánh", img: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=500&q=80", desc: "Sợi bánh canh bột gạo chan nước cá ngọt thanh ăn kèm chả chiên." },
+            { id: 39, name: "Bánh khọt tôm", emoji: "🍤", category: "bánh", img: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=500&q=80", desc: "Bánh khọt chiên giòn rụm đổ khuôn nhỏ ốp tôm sú tươi." },
+            { id: 40, name: "Bánh bèo chén", emoji: "🍮", category: "bánh", img: "https://images.unsplash.com/photo-1496116218417-1a781b1c416c?auto=format&fit=crop&w=500&q=80", desc: "Bánh bèo mỏng tang nhân tôm cháy mỡ hành chấm nước mắm ngọt." },
+            // Ăn vặt (10)
+            { id: 41, name: "Bánh tráng trộn", emoji: "🥗", category: "ăn vặt", img: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80", desc: "Đặc sản đường phố sốt bò đen chua cay mặn ngọt." },
+            { id: 42, name: "Gỏi cuốn tôm thịt", emoji: "🌯", category: "ăn vặt", img: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=500&q=80", desc: "Tôm thịt bún rau thơm cuộn tròn chấm tương đậu phộng." },
+            { id: 43, name: "Cá viên chiên mắm", emoji: "🍢", category: "ăn vặt", img: "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=500&q=80", desc: "Mẹt xiên que đủ loại xóc tỏi ớt nước mắm đậm đà." },
+            { id: 44, name: "Tokbokki phô mai", emoji: "🧀", category: "ăn vặt", img: "https://images.unsplash.com/photo-1635363638580-c2809d049eee?auto=format&fit=crop&w=500&q=80", desc: "Bánh gạo dẻo mềm bơi trong sốt cay ngọt phủ phô mai kéo sợi." },
+            { id: 45, name: "Gà rán sốt cay", emoji: "🍗", category: "ăn vặt", img: "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=500&q=80", desc: "Miếng gà chiên áo bột giòn rụm tẩm sốt cay ngọt Hàn Quốc." },
+            { id: 46, name: "Phá lấu bò bánh mì", emoji: "🥘", category: "ăn vặt", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80", desc: "Nội tạng bò khìa nước dừa thơm lừng béo ngậy chấm bánh mì." },
+            { id: 47, name: "Bột chiên trứng", emoji: "🍳", category: "ăn vặt", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=500&q=80", desc: "Khối bột gạo chiên vàng giòn xèo trứng gà và hành lá." },
+            { id: 48, name: "Bắp xào mỡ hành", emoji: "🌽", category: "ăn vặt", img: "https://images.unsplash.com/photo-1516684732162-798a0062be99?auto=format&fit=crop&w=500&q=80", desc: "Hạt bắp ngọt xào bơ mỡ hành ruốc tôm thơm nức mũi." },
+            { id: 49, name: "Trứng cút nướng", emoji: "🥚", category: "ăn vặt", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=500&q=80", desc: "Chén trứng cút nướng mỡ hành phô mai ruốc xúc xích." },
+            { id: 50, name: "Gỏi khô bò", emoji: "🥙", category: "ăn vặt", img: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80", desc: "Đu đủ bào giòn rụm trộn khô bò đen và nước mắm chua ngọt." },
+            // Đồ uống (10)
+            { id: 51, name: "Trà sữa trân châu", emoji: "🧋", category: "đồ uống", img: "https://images.unsplash.com/photo-1558857563-b371033873b8?auto=format&fit=crop&w=500&q=80", desc: "Trà sữa béo ngậy quyện trân châu đường đen dẻo dai." },
+            { id: 52, name: "Cà phê sữa đá", emoji: "☕", category: "đồ uống", img: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=500&q=80", desc: "Cà phê phin Việt Nam đắng đậm quyện sữa đặc ngọt ngào." },
+            { id: 53, name: "Trà đào cam sả", emoji: "🍹", category: "đồ uống", img: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=500&q=80", desc: "Trà thanh mát chua ngọt giải nhiệt mùa hè tuyệt đỉnh." },
+            { id: 54, name: "Sinh tố bơ", emoji: "🥑", category: "đồ uống", img: "https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?auto=format&fit=crop&w=500&q=80", desc: "Bơ sáp xay sữa đặc béo ngậy, mịn màng mát lạnh." },
+            { id: 55, name: "Chè khúc bạch", emoji: "🍨", category: "đồ uống", img: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=500&q=80", desc: "Thạch phô mai béo thanh ăn cùng nhãn lồng nước đường phèn." },
+            { id: 56, name: "Cà phê muối", emoji: "🧂", category: "đồ uống", img: "https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=500&q=80", desc: "Cà phê đặc trưng với lớp foam kem mằn mặn béo ngậy." },
+            { id: 57, name: "Nước ép dưa hấu", emoji: "🍉", category: "đồ uống", img: "https://images.unsplash.com/photo-1589734346106-96da6de4775c?auto=format&fit=crop&w=500&q=80", desc: "Nước ép tươi 100% nguyên chất giải khát ngọt lịm." },
+            { id: 58, name: "Trà chanh giã tay", emoji: "🍋", category: "đồ uống", img: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=500&q=80", desc: "Tranh chanh Quảng Đông giã tay thơm lừng mùi tinh dầu." },
+            { id: 59, name: "Sữa chua dẻo", emoji: "🍦", category: "đồ uống", img: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=500&q=80", desc: "Từng khối sữa chua cắt vuông dẻo quánh rắc bột cacao." },
+            { id: 60, name: "Nước mía cốt dừa", emoji: "🥥", category: "đồ uống", img: "https://images.unsplash.com/photo-1525385133512-2f3bdd039a2e?auto=format&fit=crop&w=500&q=80", desc: "Nước mía ép ngọt lịm phủ lớp cốt dừa béo và dừa nạo." }
+        ];
+
+        let foodList = JSON.parse(localStorage.getItem('angi_pro_data')) || [...defaultFoods];
+        let currentFilter = 'all';
+        let currentSpinMode = 'all';
+        let currentSelectedFood = null;
+        let isSpinningSlot = false;
+        
+        // Gacha
+        let gachaTapCount = 0;
+        
+        // Battle
+        let battleCandidates = [];
+        let battleRoundIdx = 1;
+        let battleTotalMatches = 7;
+        let battleCurrentMatch = 0;
+
+        /* ================= KHỞI TẠO ================= */
+        window.onload = () => {
+            checkTimeContext();
+            renderCategories();
+            renderFoodGrid(foodList);
+            renderKhoGrid();
+        };
+
+        // Ưu tiên món ăn trưa lúc 11h-13h
+        function checkTimeContext() {
+            const hour = new Date().getHours();
+            const greeting = document.getElementById('timeGreetingText');
+            if (hour >= 11 && hour <= 13) {
+                greeting.innerText = "Giờ trưa rồi! Hệ thống ưu tiên chọn đồ ăn chắc bụng nhé.";
+                currentSpinMode = 'food';
+                document.querySelectorAll('.spin-mode-btn').forEach(btn => {
+                    btn.classList.replace('bg-orange-600', 'hover:bg-orange-50');
+                    btn.classList.replace('text-white', 'text-slate-500');
+                    if(btn.innerText.includes('Đồ Ăn')) {
+                        btn.classList.replace('hover:bg-orange-50', 'bg-orange-600');
+                        btn.classList.replace('text-slate-500', 'text-white');
+                    }
+                });
+            } else if (hour >= 18 && hour <= 21) {
+                greeting.innerText = "Buổi tối thảnh thơi, ăn lẩu nướng hay ăn vặt đây?";
+            }
+        }
+
+        /* ================= GIAO DIỆN CHUNG ================= */
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('text-orange-600');
+                el.classList.add('text-slate-400');
+            });
+            if(btn) {
+                btn.classList.remove('text-slate-400');
+                btn.classList.add('text-orange-600');
+            }
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toastText').innerText = msg;
+            t.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => t.classList.add('opacity-0', 'pointer-events-none'), 2000);
+        }
+
+        function handleImgError(img) {
+            if (!img.src.includes('placehold.co')) {
+                img.src = 'https://placehold.co/400x400/ffedd5/ea580c?text=Yummy';
+            }
+        }
+
+        /* ================= TAB 1: THỰC ĐƠN ================= */
+        const categories = [
+            { id: 'all', name: 'Tất cả' }, { id: 'cơm', name: '🍚 Cơm' }, { id: 'nước', name: '🍜 Bún/Phở' },
+            { id: 'lẩu nướng', name: '🍲 Lẩu/Nướng' }, { id: 'bánh', name: '🥖 Bánh' }, 
+            { id: 'ăn vặt', name: '🍢 Ăn vặt' }, { id: 'đồ uống', name: '🧋 Đồ uống' }
+        ];
+
+        function renderCategories() {
+            const container = document.getElementById('categoryFilters');
+            container.innerHTML = categories.map(c => `
+                <button onclick="filterFoodGrid('${c.id}', this)" class="cat-btn px-4 py-2 ${c.id==='all' ? 'bg-slate-800 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-600'} rounded-xl text-xs font-bold whitespace-nowrap transition">
+                    ${c.name}
+                </button>
+            `).join('');
+        }
+
+        function filterFoodGrid(cat, btn) {
+            currentFilter = cat;
+            document.querySelectorAll('.cat-btn').forEach(b => {
+                b.className = "cat-btn px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold whitespace-nowrap transition";
+            });
+            btn.className = "cat-btn px-4 py-2 bg-slate-800 text-white shadow-md rounded-xl text-xs font-bold whitespace-nowrap transition";
+            renderFoodGrid(cat === 'all' ? foodList : foodList.filter(f => f.category === cat));
+        }
+
+        function handleSearch(keyword) {
+            const val = keyword.toLowerCase().trim();
+            const filtered = foodList.filter(f => f.name.toLowerCase().includes(val) || f.category.toLowerCase().includes(val));
+            renderFoodGrid(filtered);
+        }
+
+        function renderFoodGrid(items) {
+            document.getElementById('itemCount').innerText = `${items.length} món`;
+            const grid = document.getElementById('foodGrid');
+            if (items.length === 0) {
+                grid.innerHTML = `<div class="text-center py-10 text-slate-400 text-sm font-bold">Không tìm thấy món!</div>`;
+                return;
+            }
+            grid.innerHTML = items.map(f => `
+                <div onclick="directSelectFood(${f.id})" class="bg-white border border-slate-100 p-3 rounded-2xl flex items-center gap-3 cursor-pointer hover:border-orange-200 transition shadow-sm">
+                    <div class="relative w-16 h-16 shrink-0 bg-slate-100 rounded-xl overflow-hidden">
+                        <img src="${f.img}" onerror="handleImgError(this)" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-extrabold text-sm text-slate-800 line-clamp-1">${f.emoji} ${f.name}</h4>
+                        <p class="text-[11px] text-slate-500 line-clamp-1 mt-0.5">${f.desc}</p>
+                        <span class="inline-block mt-1 text-[8px] uppercase bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold">${f.category}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function directSelectFood(id) {
+            currentSelectedFood = foodList.find(f => f.id === id);
+            openDeliveryModal('list');
+        }
+
+        /* ================= TÍNH NĂNG ĐỘC TÀI (SLOT MACHINE) ================= */
+        function setSpinFilter(mode, btn) {
+            playSound('tap');
+            currentSpinMode = mode;
+            document.querySelectorAll('.spin-mode-btn').forEach(b => {
+                b.classList.replace('bg-orange-600', 'hover:bg-orange-50');
+                b.classList.replace('text-white', 'text-slate-500');
+            });
+            btn.classList.replace('hover:bg-orange-50', 'bg-orange-600');
+            btn.classList.replace('text-slate-500', 'text-white');
+        }
+
+        function openDictatorModal() {
+            playSound('tap');
+            const modal = document.getElementById('dictatorModal');
+            document.getElementById('dictatorActions').classList.add('opacity-50', 'pointer-events-none');
+            
+            // Text logic
+            const hour = new Date().getHours();
+            let text = "Hệ thống độc tài đang quét dữ liệu...";
+            if (currentSpinMode === 'food') {
+                if (hour >= 11 && hour <= 13) text = "Giờ trưa - Chốt ngay đồ ăn chắc bụng!";
+                else text = "Chỉ lọc các món ăn ngon nhất.";
+            } else if (currentSpinMode === 'drink') {
+                text = "Hệ thống lọc toàn đồ uống giải khát.";
+            }
+            document.getElementById('dictatorReason').innerText = text;
+            document.getElementById('dictatorImg').src = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+            document.getElementById('dictatorName').innerText = "Đang chọn...";
+
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); startSlotSpin(); }, 50);
+        }
+
+        function closeDictatorModal() {
+            if(isSpinningSlot) return;
+            const modal = document.getElementById('dictatorModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function startSlotSpin() {
+            if (isSpinningSlot) return;
+            isSpinningSlot = true;
+            initAudio();
+            document.getElementById('dictatorActions').classList.add('opacity-50', 'pointer-events-none');
+            
+            let pool = foodList;
+            if (currentSpinMode === 'food') pool = foodList.filter(f => f.category !== 'đồ uống');
+            if (currentSpinMode === 'drink') pool = foodList.filter(f => f.category === 'đồ uống');
+            if (pool.length === 0) pool = foodList;
+
+            const winEl = document.getElementById('slotWindow');
+            let steps = 25, idx = 0, delay = 40;
+            
+            const spin = () => {
+                playSound('tick');
+                const item = pool[Math.floor(Math.random() * pool.length)];
+                winEl.classList.add('slot-blur');
+                
+                document.getElementById('dictatorImg').src = item.img;
+                document.getElementById('dictatorName').innerText = `${item.emoji} ${item.name}`;
+                document.getElementById('dictatorEmojiBadge').innerText = item.emoji;
+                document.getElementById('dictatorCategory').innerText = item.category;
+
+                idx++;
+                if (idx < steps) {
+                    delay += 10; // Chậm dần
+                    setTimeout(spin, delay);
+                    setTimeout(() => winEl.classList.remove('slot-blur'), 20);
+                } else {
+                    winEl.classList.remove('slot-blur');
+                    currentSelectedFood = pool[Math.floor(Math.random() * pool.length)];
+                    document.getElementById('dictatorImg').src = currentSelectedFood.img;
+                    document.getElementById('dictatorName').innerText = `${currentSelectedFood.emoji} ${currentSelectedFood.name}`;
+                    document.getElementById('dictatorEmojiBadge').innerText = currentSelectedFood.emoji;
+                    document.getElementById('dictatorCategory').innerText = currentSelectedFood.category;
+                    
+                    playSound('win');
+                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.5 }, zIndex: 100 });
+                    
+                    document.getElementById('dictatorReason').innerText = "🎉 CHỐT ĐƠN MÓN NÀY! 🎉";
+                    document.getElementById('dictatorActions').classList.remove('opacity-50', 'pointer-events-none');
+                    isSpinningSlot = false;
+                }
+            };
+            spin();
+        }
+
+        /* ================= TÚI MÙ (GACHA) ================= */
+        function openGachaModal() {
+            playSound('tap');
+            resetGachaBox();
+            const modal = document.getElementById('gachaModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+        
+        function closeGachaModal() {
+            const modal = document.getElementById('gachaModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function resetGachaBox() {
+            gachaTapCount = 0;
+            const box = document.getElementById('gachaBoxStage');
+            box.classList.remove('hidden');
+            box.classList.add('flex'); // Khôi phục lại flex box
+            
+            document.getElementById('gachaResultStage').classList.add('hidden');
+            document.getElementById('gachaTapHint').innerText = "👆 Chạm để mở";
+            document.getElementById('gachaHearts').innerHTML = `
+                <span class="w-8 h-2.5 rounded-full bg-amber-200"></span>
+                <span class="w-8 h-2.5 rounded-full bg-amber-200"></span>
+                <span class="w-8 h-2.5 rounded-full bg-amber-200"></span>
+            `;
+        }
+
+        function tapGachaBox() {
+            if (gachaTapCount >= 3) return; // Khóa lại không cho bấm thêm khi đã đủ 3 chạm
+            
+            playSound('tap');
+            gachaTapCount++;
+            const box = document.getElementById('gachaBoxStage');
+            
+            // Cập nhật thanh máu (trái tim)
+            const hearts = document.getElementById('gachaHearts').children;
+            if(hearts[3-gachaTapCount]) hearts[3-gachaTapCount].classList.replace('bg-amber-200', 'bg-amber-500');
+
+            if (gachaTapCount === 1) {
+                box.classList.remove('shake-1', 'shake-2');
+                void box.offsetWidth;
+                box.classList.add('shake-1');
+                document.getElementById('gachaTapHint').innerText = "👆 Chạm phát nữa";
+            } else if (gachaTapCount === 2) {
+                box.classList.remove('shake-1', 'shake-2');
+                void box.offsetWidth;
+                box.classList.add('shake-2');
+                document.getElementById('gachaTapHint').innerText = "🔥 Sắp ra rồi!";
+            } else if (gachaTapCount === 3) {
+                playSound('win');
+                confetti({ particleCount: 100, spread: 90, y: 0.6, zIndex: 9999 });
+                
+                // Đồng bộ với Bộ lọc
+                let pool = foodList;
+                if (currentSpinMode === 'food') pool = foodList.filter(f => f.category !== 'đồ uống');
+                if (currentSpinMode === 'drink') pool = foodList.filter(f => f.category === 'đồ uống');
+                if (pool.length === 0) pool = foodList;
+
+                const item = pool[Math.floor(Math.random() * pool.length)];
+                currentSelectedFood = item;
+                
+                // Ẩn hộp quà đúng cách để tránh xung đột CSS
+                box.classList.remove('flex');
+                box.classList.add('hidden');
+                document.getElementById('gachaResultStage').classList.remove('hidden');
+                
+                document.getElementById('gachaImg').src = item.img;
+                document.getElementById('gachaName').innerText = `${item.emoji} ${item.name}`;
+                document.getElementById('gachaEmoji').innerText = item.emoji;
+                document.getElementById('gachaDesc').innerText = item.desc;
+            }
+        }
+
+        /* ================= ĐẤU TRƯỜNG ================= */
+        function openBattleModal() {
+            playSound('tap');
+            
+            // Lấy ngẫu nhiên 8 món đồng bộ theo Bộ lọc
+            let pool = foodList;
+            if (currentSpinMode === 'food') pool = foodList.filter(f => f.category !== 'đồ uống');
+            if (currentSpinMode === 'drink') pool = foodList.filter(f => f.category === 'đồ uống');
+            if (pool.length < 8) pool = foodList; // fallback nếu thiếu món
+            
+            pool = [...pool].sort(() => 0.5 - Math.random());
+            battleCandidates = pool.slice(0, 8);
+            battleTotalMatches = 7;
+            battleCurrentMatch = 0;
+            battleRoundIdx = 8; 
+
+            const modal = document.getElementById('battleModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            
+            renderBattleMatch();
+        }
+
+        function closeBattleModal() {
+            const modal = document.getElementById('battleModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function renderBattleMatch() {
+            const pBar = document.getElementById('battleProgressBar');
+            pBar.style.width = `${(battleCurrentMatch / battleTotalMatches) * 100}%`;
+
+            if (battleCandidates.length === 1) {
+                // Có quán quân
+                currentSelectedFood = battleCandidates[0];
+                playSound('win');
+                confetti({ particleCount: 150, spread: 100, zIndex: 100 });
+                
+                document.getElementById('battleRoundText').innerText = "🏆 QUÁN QUÂN";
+                document.getElementById('battleProgressText').innerText = "";
+                document.getElementById('battleChoicesContainer').innerHTML = `
+                    <div class="bg-gradient-to-br from-amber-100 to-orange-100 border-2 border-orange-400 p-4 rounded-3xl text-center shadow-xl transform scale-105 transition">
+                        <img src="${currentSelectedFood.img}" onerror="handleImgError(this)" class="w-full h-40 object-cover rounded-2xl mb-3 shadow-md">
+                        <h4 class="font-black text-lg text-orange-900">${currentSelectedFood.emoji} ${currentSelectedFood.name}</h4>
+                        <p class="text-xs text-orange-700 mt-1">Sự lựa chọn hoàn hảo của bạn!</p>
+                        <button onclick="openDeliveryModal('battle')" class="w-full mt-4 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl font-bold text-xs shadow">Chốt Đơn Kẻ Chiến Thắng</button>
+                    </div>
+                `;
+                return;
+            }
+
+            let roundName = "Tứ Kết";
+            if (battleCandidates.length === 4) roundName = "Bán Kết";
+            if (battleCandidates.length === 2) roundName = "Chung Kết";
+
+            document.getElementById('battleRoundText').innerText = roundName;
+            document.getElementById('battleProgressText').innerText = `Trận ${battleCurrentMatch + 1}/${battleTotalMatches}`;
+
+            const a = battleCandidates[0];
+            const b = battleCandidates[1];
+
+            document.getElementById('battleChoicesContainer').innerHTML = `
+                <div onclick="selectBattleWinner(${a.id})" class="bg-white border-2 border-slate-100 p-3 rounded-2xl text-center shadow hover:border-orange-400 cursor-pointer transition active:scale-95 group">
+                    <div class="relative w-full h-32 rounded-xl overflow-hidden mb-2">
+                        <img src="${a.img}" onerror="handleImgError(this)" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition"></div>
+                    </div>
+                    <h4 class="font-bold text-sm text-slate-800">${a.emoji} ${a.name}</h4>
+                </div>
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-slate-900 text-white rounded-full flex items-center justify-center font-black text-sm z-10 border-4 border-slate-100 shadow-lg">VS</div>
+                <div onclick="selectBattleWinner(${b.id})" class="bg-white border-2 border-slate-100 p-3 rounded-2xl text-center shadow hover:border-orange-400 cursor-pointer transition active:scale-95 group">
+                    <div class="relative w-full h-32 rounded-xl overflow-hidden mb-2">
+                        <img src="${b.img}" onerror="handleImgError(this)" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition"></div>
+                    </div>
+                    <h4 class="font-bold text-sm text-slate-800">${b.emoji} ${b.name}</h4>
+                </div>
+            `;
+        }
+
+        function selectBattleWinner(id) {
+            playSound('tap');
+            const winner = battleCandidates.find(f => f.id === id);
+            battleCandidates = battleCandidates.slice(2); 
+            battleCandidates.push(winner); 
+            battleCurrentMatch++;
+            renderBattleMatch();
+        }
+
+        /* ================= QUẢN LÝ KHO (CRUD) ================= */
+        function renderKhoGrid() {
+            const grid = document.getElementById('khoFoodGrid');
+            grid.innerHTML = foodList.map(f => `
+                <div class="bg-white border border-slate-200 p-3 rounded-2xl flex items-center justify-between shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-slate-100 rounded-xl overflow-hidden shrink-0">
+                            <img src="${f.img}" onerror="handleImgError(this)" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-xs text-slate-800 line-clamp-1">${f.emoji} ${f.name}</h4>
+                            <span class="text-[9px] uppercase bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-bold">${f.category}</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-1.5 shrink-0">
+                        <button onclick="openFormModal(${f.id})" class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center hover:bg-blue-100"><i class="fa-solid fa-pen text-xs"></i></button>
+                        <button onclick="deleteFood(${f.id})" class="w-8 h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center hover:bg-red-100"><i class="fa-solid fa-trash text-xs"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('angi_pro_data', JSON.stringify(foodList));
+            renderFoodGrid(currentFilter === 'all' ? foodList : foodList.filter(f => f.category === currentFilter));
+            renderKhoGrid();
+        }
+
+        function deleteFood(id) {
+            playSound('tap');
+            if(confirm("Bạn muốn xóa món này khỏi kho?")) {
+                foodList = foodList.filter(f => f.id !== id);
+                saveToStorage();
+                showToast("Đã xóa món ăn!");
+            }
+        }
+
+        function resetDefaultFoods() {
+            playSound('tap');
+            if(confirm("Xóa toàn bộ chỉnh sửa và khôi phục 60 món gốc?")) {
+                foodList = [...defaultFoods];
+                saveToStorage();
+                showToast("Đã khôi phục dữ liệu gốc!");
+            }
+        }
+
+        function openFormModal(id = null) {
+            playSound('tap');
+            const modal = document.getElementById('formModal');
+            document.getElementById('foodForm').reset();
+            
+            if (id) {
+                // Sửa
+                const f = foodList.find(i => i.id === id);
+                document.getElementById('formTitle').innerText = "✏️ Sửa Món Ăn";
+                document.getElementById('formId').value = f.id;
+                document.getElementById('formName').value = f.name;
+                document.getElementById('formImg').value = f.img;
+                document.getElementById('formEmoji').value = f.emoji || '🍲';
+                document.getElementById('formCategory').value = f.category;
+                document.getElementById('formDesc').value = f.desc;
+            } else {
+                // Thêm mới
+                document.getElementById('formTitle').innerText = "➕ Thêm Món Mới";
+                document.getElementById('formId').value = "";
+            }
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        function closeFormModal() {
+            const modal = document.getElementById('formModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function handleSaveFood(e) {
+            e.preventDefault();
+            const id = document.getElementById('formId').value;
+            const name = document.getElementById('formName').value;
+            const img = document.getElementById('formImg').value;
+            const emoji = document.getElementById('formEmoji').value;
+            const category = document.getElementById('formCategory').value;
+            const desc = document.getElementById('formDesc').value;
+
+            if (id) {
+                // Update
+                const f = foodList.find(i => i.id == id);
+                if(f) {
+                    f.name = name; f.img = img; f.emoji = emoji; 
+                    f.category = category; f.desc = desc;
+                }
+                showToast("Cập nhật thành công!");
+            } else {
+                // Insert
+                foodList.unshift({ id: Date.now(), name, img, emoji, category, desc });
+                showToast("Thêm món mới thành công!");
+            }
+            
+            saveToStorage();
+            closeFormModal();
+        }
+
+        /* ================= CHỐT ĐƠN (DELIVERY) ================= */
+        function openDeliveryModal(source) {
+            playSound('tap');
+            if(!currentSelectedFood) return;
+            
+            // Đóng các modal khác nếu có để tránh đè lớp
+            if(source === 'dictator') closeDictatorModal();
+            if(source === 'gacha') closeGachaModal();
+            if(source === 'battle') closeBattleModal();
+            
+            document.getElementById('deliveryTitle').innerText = `${currentSelectedFood.emoji} ${currentSelectedFood.name}`;
+            
+            // Tạo link Google Maps
+            const query = encodeURIComponent(currentSelectedFood.name + " gần đây");
+            document.getElementById('linkGoogleMaps').href = `https://www.google.com/maps/search/?api=1&query=${query}`;
+            
+            const modal = document.getElementById('deliveryModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        function closeDeliveryModal() {
+            const modal = document.getElementById('deliveryModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+    </script>
+</body>
+</html>
